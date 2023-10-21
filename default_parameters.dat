@@ -1,0 +1,116 @@
+   {
+        'species':30,
+        'death':10**-3, #Extinction threshold (= individual) knowing that max growth is 1
+
+        #Landscape size -- Keep multiples of 2 for FFT
+        'landx':64,
+        'landy':64,
+        
+        # Number of environmental factors
+        'envdim':1, 
+
+        #Initial abundance of each species at each pixel
+        'n': {
+            'type':'variable',
+            'shape': ('species','landx','landy'),
+            'range': (0.1, 0.12),
+            'distribution': 'uniform',
+        },
+
+        #Value of the environment at each pixel
+        'environment':{
+            'shape':('landx','landy','envdim'),
+            'range':(0.,100.),
+            'distribution':'noise',
+            'method':'fft',
+            'color':1, #Color of noise (spectral exponent)
+            'cutoff':.2, #Exponential cutoff on spectrum (max=1)
+        },
+
+        #Species log-body size (trait used below to parametrize all interactions, trophic and nontrophic)
+        'size': {
+            'range': (0, 10),
+            'distribution': 'uniform',
+            'sorted': True,
+        },
+
+        #Environmental niche
+        'envniche':
+        {
+            #Center
+            'pos':{
+                'shape':('species','envdim'),
+                'range':(0,100),
+                'distribution':'uniform',
+                'sorted':1,
+            },
+            #Half-width (standard deviation)
+            'width':{
+                'shape':('species','envdim'),
+                'range':(1,10),
+                'distribution':'power',
+                'exponent':-1,
+                'sign':1,
+            },
+        },
+
+        #Trophic interactions
+        'trophic':{
+            'ON':0, #Switch ON/OFF trophic interactions
+
+            #Coefficient values
+            'mean':1., 'std':0.1,
+            'distribution':'normal',
+            'shape':('species','species'),
+            'efficiency':0.4,
+            'diagonal':0, #If 0, no cannibalism
+
+            #Predation range (size range of edible prey)
+            'distance':.25, #Distance of upper limit of predation range to predator trait (if > 0, predator cannot eat equal size)
+            'width':.25, #Half-width of predation range
+            'range_exp':.5, #Exponent for how width changes with trait
+            'connectance':.5, #Connectance within predation range
+            'randomness':0, #Randomness in range center
+
+            #Spatial scaling
+            'multiscale':1, #FOR TESTS: Switch ON/OFF multiscale (always ON in Fourier)
+            'scale':.1, #Typical spatial scale (in pixels)
+            'trait_exp':0.5, #Exponent for how scale changes with trait value
+            'kernel':'gauss', #Spatial kernel
+        },
+
+        #Dispersal
+        'dispersal':{
+            'mean':.1,
+            'multiscale':0,  #Switch ON/OFF multiscale (ON not supported yet)
+            'kernel':'gauss', #Spatial kernel (not supported yet)
+            'trait_exp': 0, #Exponent for how spatial range of interaction changes with trait value
+        },
+
+        #Competition
+        'competition': {
+            'ON':1, #Switch ON/OFF competition (unstable if OFF)
+            'shape':('species','species'),
+
+            #Coefficient values:
+                #Intraspecific
+                'diagonal':1,
+
+                #Interspecific
+                'distribution':'uniform',
+                'range': (0.0, 0.3),
+
+            #Spatial scaling
+            'multiscale': 1, #FOR TESTS: Switch ON/OFF multiscale (always ON in Fourier)
+            'scale':.1, #Typical spatial scale (in pixels)
+            'trait_exp':0, #Exponent for how scale changes with trait value
+            'kernel':'gauss', #Spatial kernel
+        },
+
+        #Mortality
+        'mortality': {
+            'distribution': 'uniform',
+            'range': (0.002, 0.01),
+        },
+
+    }
